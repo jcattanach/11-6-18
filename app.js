@@ -15,6 +15,14 @@ app.set('views','./views')
 app.set('view engine','mustache')
 
 
+app.get('/view-posts', function(req,res){
+  res.render('view-posts')
+})
+
+app.get('/create-post', function(req,res){
+  res.render('create-post')
+})
+
 app.get('/register', function(req,res){
   res.render('register')
 })
@@ -22,11 +30,12 @@ app.post('/register', function(req,res){
   let registerUsername = req.body.username
   let registerPassword = req.body.password
 
-  let userInfo = { username : registerUsername, password : registerPassword}
-  users.push(userInfo)
-  console.log(users)
-
-  res.redirect('/login')
+  db.none('INSERT INTO users(username, password) VALUES ($1,$2)',[registerUsername, registerPassword]).then(function(){
+    res.redirect('/login')
+  })
+  .catch(function(error){
+    console.log(error)
+  })
 })
 
 app.get('/login', function(req,res){
@@ -40,7 +49,7 @@ app.post('/login', function(req,res){
   for(let index = 0; index < users.length; index++){
     if (loginUsername == users[index].username && loginPassword == users[index].password){
       console.log("Login successful")
-      res.redirect('/')
+      res.redirect('/view-posts')
     } else {
       console.log('Username or password is incorrect')
       res.redirect('/login')
